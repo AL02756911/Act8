@@ -24,15 +24,21 @@ class SuperheroeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_real' => 'required|string|max:255',
-            'alias' => 'required|string|max:255',
-            'foto' => 'required|url',
-            'informacion_adicional' => 'nullable|string',
-        ]);
+        'nombre_real' => 'required|string|max:255',
+        'alias' => 'required|string|max:255',
+        'foto' => 'required|image|max:2048',
+        'informacion_adicional' => 'nullable|string',
+    ]);
 
-        Superheroe::create($request->all());
+    if ($request->hasFile('foto')) {
+        $path = $request->file('foto')->store('imagenes', 'public');
+        $data = $request->all();
+        $data['foto'] = $path;
+    }
 
-        return redirect()->route('superheroes.index')->with('success', 'Superheroe creado correctamente');
+    Superheroe::create($data);
+
+    return redirect()->route('superheroes.index')->with('success', 'Superheroe creado correctamente');
     }
 
     // Mostrar los detalles de un superheroe
@@ -51,15 +57,22 @@ class SuperheroeController extends Controller
     public function update(Request $request, Superheroe $superheroe)
     {
         $request->validate([
-            'nombre_real' => 'required|string|max:255',
-            'alias' => 'required|string|max:255',
-            'foto' => 'required|url',
-            'informacion_adicional' => 'nullable|string',
-        ]);
+        'nombre_real' => 'required|string|max:255',
+        'alias' => 'required|string|max:255',
+        'foto' => 'sometimes|image|max:2048',
+        'informacion_adicional' => 'nullable|string',
+    ]);
 
-        $superheroe->update($request->all());
+    $data = $request->all();
 
-        return redirect()->route('superheroes.index')->with('success', 'Superheroe actualizado correctamente');
+    if ($request->hasFile('foto')) {
+        $path = $request->file('foto')->store('imagenes', 'public');
+        $data['foto'] = $path;
+    }
+
+    $superheroe->update($data);
+
+    return redirect()->route('superheroes.index')->with('success', 'Superheroe actualizado correctamente');
     }
 
     // Eliminar un superheroe
@@ -68,5 +81,19 @@ class SuperheroeController extends Controller
         $superheroe->delete();
 
         return redirect()->route('superheroes.index')->with('success', 'Superheroe eliminado correctamente');
+    }
+
+    public function restore($id)
+    {
+    $superheroe = Superheroe::withTrashed()->findOrFail($id);
+    $superheroe->restore();
+
+    return redirect()->route('superheroes.trashed')->with('success', 'Superheroe restaurado correctamente');
+    }
+
+    public function trashed()
+    {
+    $superheroes = Superheroe::onlyTrashed()->get();
+    return view('superheroes.trashed', compact('superheroes'));
     }
 }

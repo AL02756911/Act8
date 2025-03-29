@@ -2,9 +2,7 @@
 
 @section('content')
 <div class="container">
-  <h1>Superheroes Activos</h1>
-  <a href="{{ route('superheroes.create') }}" class="btn btn-success mb-3">Agregar Superheroe</a>
-  <a href="{{ route('superheroes.trashed') }}" class="btn btn-secondary mb-3">Ver Eliminados</a>
+  <h1>Superheroes Eliminados</h1>
   @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
   @endif
@@ -29,12 +27,10 @@
             <img src="{{ asset('storage/' . $superheroe->foto) }}" alt="{{ $superheroe->alias }}" width="80">
           </td>
           <td>
-            <a href="{{ route('superheroes.show', $superheroe) }}" class="btn btn-info btn-sm">Ver</a>
-            <a href="{{ route('superheroes.edit', $superheroe) }}" class="btn btn-warning btn-sm">Editar</a>
-            <form action="{{ route('superheroes.destroy', $superheroe) }}" method="POST" style="display:inline-block;">
+            <form action="{{ route('superheroes.restore', $superheroe->id) }}" method="POST" style="display:inline-block;">
               @csrf
-              @method('DELETE')
-              <button class="btn btn-danger btn-sm" onclick="return confirm('Estas seguro?')">Eliminar</button>
+              @method('PATCH')
+              <button type="submit" class="btn btn-info btn-sm">Restaurar</button>
             </form>
           </td>
         </tr>
@@ -42,7 +38,8 @@
       </tbody>
     </table>
   @else
-    <p>No hay superheroes activos.</p>
+    <p>No hay superheroes eliminados.</p>
   @endif
+  <a href="{{ route('superheroes.index') }}" class="btn btn-primary mt-3">Volver</a>
 </div>
 @endsection

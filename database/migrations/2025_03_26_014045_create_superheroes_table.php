@@ -15,6 +15,7 @@ class CreateSuperheroesTable extends Migration
             $table->string('foto');
             $table->text('informacion_adicional')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
